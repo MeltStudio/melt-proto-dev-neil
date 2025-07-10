@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import { Form } from "@/src/components/form";
 import { useParams } from "next/navigation";
 import { useTaskContext } from "@/src/providers/fake-api-provider";
@@ -17,9 +16,9 @@ function TaskCreationPage() {
   });
   
   return (
-    <DefaultPageLayout>
+    <>
       <Form action="edit" onSubmit={editTask} default_values={data} />
-    </DefaultPageLayout>
+    </>
   );
 }
 
