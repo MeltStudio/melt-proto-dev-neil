@@ -29,6 +29,7 @@ import Skeleton from "../components/skeleton";
 import { useTaskContext } from "../providers/fake-api-provider";
 import { useQuery } from "@tanstack/react-query";
 import { Task } from "../components/task";
+import EmptyState from "../components/empty-state";
 
 function Home() {
   const { getTasks } = useTaskContext();
@@ -47,7 +48,6 @@ function Home() {
           <Link href='/new'>
             <Button
               icon={<FeatherPlus />}
-              onClick={(event: React.MouseEvent<HTMLButtonElement>) => { }}
             >
               Add task
             </Button>
@@ -108,31 +108,33 @@ function Home() {
         </div>
         <SubframeCore.ContextMenu.Root>
           <SubframeCore.ContextMenu.Trigger asChild={true}>
-            <Table
-              header={
-                <Table.HeaderRow>
-                  <Table.HeaderCell icon={<FeatherArrowUp />}>
-                    Title
-                  </Table.HeaderCell>
-                  <Table.HeaderCell icon={<FeatherArrowUp />}>
-                    Description
-                  </Table.HeaderCell>
-                  <Table.HeaderCell icon={<FeatherArrowUp />}>
-                    Status
-                  </Table.HeaderCell>
-                  <Table.HeaderCell icon={<FeatherArrowUp />}>
-                    Due Date
-                  </Table.HeaderCell>
-                </Table.HeaderRow>
-              }
-            >
-
-              {isPending ? (
-                <Skeleton />
-              ) : data?.map((task) =>
+            <>
+              <Table
+                header={
+                  <Table.HeaderRow>
+                    <Table.HeaderCell icon={<FeatherArrowUp />}>
+                      Title
+                    </Table.HeaderCell>
+                    <Table.HeaderCell icon={<FeatherArrowUp />}>
+                      Description
+                    </Table.HeaderCell>
+                    <Table.HeaderCell icon={<FeatherArrowUp />}>
+                      Status
+                    </Table.HeaderCell>
+                    <Table.HeaderCell icon={<FeatherArrowUp />}>
+                      Due Date
+                    </Table.HeaderCell>
+                  </Table.HeaderRow>
+                }
+              >
+                {isPending ? (
+                  <Skeleton />
+                ) : data?.map((task) =>
                   <Task key={task.id} task={task} refetch={refetch} />
-              )}
-            </Table>
+                )}
+              </Table>
+              {!data?.length && <EmptyState />}
+            </>
           </SubframeCore.ContextMenu.Trigger>
           <SubframeCore.ContextMenu.Portal>
             <SubframeCore.ContextMenu.Content
