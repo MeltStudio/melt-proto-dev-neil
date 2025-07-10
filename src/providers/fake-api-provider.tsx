@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, PropsWithChildren, useCallback, useContext, useMemo, useState } from 'react';
-import { FormData, Task, TaskFilters } from '../utils/types';
+import { FormData, Task, TaskFilters, TaskSort } from '../utils/types';
 
 type TasksContext = {
     getTasks: () => Promise<Array<Task> | null | undefined>;
@@ -10,10 +10,11 @@ type TasksContext = {
     editTask: (formData: FormData) => Promise<void>;
     deleteTask: (taskId: string) => Promise<void>;
     paginateTasks: (
-		filters: TaskFilters,
-		page: number,
-		pageSize: number
-	) => { data: Task[]; total: number };
+        filters: TaskFilters,
+        page: number,
+        pageSize: number,
+        sort?: TaskSort
+    ) => { data: Task[]; total: number; };
 } | null;
 
 const tasksContext = createContext<TasksContext>(null);
@@ -59,19 +60,33 @@ export function TasksProvider({ children }: PropsWithChildren) {
                 : true;
 
             return matchesSearch && matchesStatus && matchesDate;
-        })
+        });
     }, [tasks]);
 
     const paginateTasks = useCallback(
-	(filters: TaskFilters, page: number, pageSize: number) => {
-		const filtered = filterTasks(filters) ?? [];
-		const total = filtered.length;
-		const start = (page - 1) * pageSize;
-		const end = start + pageSize;
-		const data = filtered.slice(start, end);
-		return { data, total };
-	},
-	[filterTasks])
+        (filters: TaskFilters, page: number, pageSize: number, sort?: TaskSort) => {
+            let filtered = filterTasks(filters) ?? [];
+
+            if (sort) {
+                filtered = [...filtered].sort((a, b) => {
+                    const aValue = a[sort.key as keyof Task];
+                    const bValue = b[sort.key as keyof Task];
+
+                    if (aValue < bValue) return sort.direction === 'asc' ? -1 : 1;
+                    if (aValue > bValue) return sort.direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
+
+            const total = filtered.length;
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
+            const data = filtered.slice(start, end);
+
+            return { data, total };
+        },
+        [filterTasks]
+    );
 
     const value = useMemo(() => ({
         getTasks,

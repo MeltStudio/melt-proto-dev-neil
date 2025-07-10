@@ -17,3 +17,8 @@ export interface TaskFilters {
     status?: Status | undefined
     date?: Date
 }
+
+export interface TaskSort {
+	key: string
+	direction: 'asc' | 'desc';
+}

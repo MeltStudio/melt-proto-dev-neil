@@ -5,7 +5,7 @@ import { Button } from "@/ui/components/Button";
 import { FeatherPlus } from "@subframe/core";
 import * as SubframeCore from "@subframe/core";
 import { Table } from "@/ui/components/Table";
-import { FeatherArrowUp } from "@subframe/core";
+import { FeatherArrowUp, FeatherArrowDown } from "@subframe/core";
 import Link from "next/link";
 import Skeleton from "../components/skeleton";
 import { useTaskContext } from "../providers/fake-api-provider";
@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Task } from "../components/task";
 import { EmptyState } from "../components/empty-state";
 import { Filters } from "../components/filters";
-import { TaskFilters } from "../utils/types";
+import { TaskFilters, TaskSort } from "../utils/types";
 import { Pagination } from "../components/pagination";
 
 const default_values = {
@@ -23,6 +23,24 @@ const default_values = {
 };
 
 const PAGE_SIZE = 10;
+const columnTitles = [
+  {
+    label: 'Title',
+    val: 'title'
+  },
+  {
+    label: 'Description',
+    val: 'description'
+  },
+  {
+    label: 'Status',
+    val: 'status'
+  },
+  {
+    label: 'Due Date',
+    val: 'dueDate'
+  },
+];
 
 function Home() {
   const { getTasks, paginateTasks } = useTaskContext();
@@ -31,10 +49,11 @@ function Home() {
     queryFn: getTasks,
   });
   const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<TaskSort | undefined>(undefined);
   const [filters, setFilters] = useState<TaskFilters>(default_values);
   const hasFilters = Object.values(filters).some(v => v);
 
-  const { data: pagedData, total } = paginateTasks(filters, page, PAGE_SIZE);
+  const { data: pagedData, total } = paginateTasks(filters, page, PAGE_SIZE, sort);
   const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
 
   const resetFilters = () => {
@@ -65,18 +84,17 @@ function Home() {
               <Table
                 header={
                   <Table.HeaderRow>
-                    <Table.HeaderCell icon={<FeatherArrowUp />}>
-                      Title
-                    </Table.HeaderCell>
-                    <Table.HeaderCell icon={<FeatherArrowUp />}>
-                      Description
-                    </Table.HeaderCell>
-                    <Table.HeaderCell icon={<FeatherArrowUp />}>
-                      Status
-                    </Table.HeaderCell>
-                    <Table.HeaderCell icon={<FeatherArrowUp />}>
-                      Due Date
-                    </Table.HeaderCell>
+                    {columnTitles.map(({label, val}) => (
+                      <Table.HeaderCell key={label}
+                        onClick={() => {
+                          setSort((prev) => ({ key: val, direction: prev?.direction === 'asc' ? 'desc' : 'asc'}));
+                        }}
+                        icon={
+                          sort?.key === val ? (sort.direction === 'asc' ? <FeatherArrowUp /> : <FeatherArrowDown />) : null
+                        }>
+                        {label}
+                      </Table.HeaderCell>
+                    ))}
                   </Table.HeaderRow>
                 }
               >
