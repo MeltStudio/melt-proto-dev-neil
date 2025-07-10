@@ -12,7 +12,7 @@
     "@subframe/core": "^1.145.0",
     "@tanstack/react-query": "^5.82.0",
     "classnames": "^2.3.2",
-    "next": "^14.2.3",
+    "next": "^14.2.30",
     "react": "^18",
     "react-dom": "^18"
   },
