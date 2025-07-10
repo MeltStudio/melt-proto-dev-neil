@@ -11,7 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 function TaskCreationPage() {
   const { id } = useParams()
   const { getTask, editTask } = useTaskContext()
-  const { isPending, error, data } = useQuery({
+  const { data } = useQuery({
     queryKey: ['task'],
     queryFn: async () => await getTask(id as string),
   });

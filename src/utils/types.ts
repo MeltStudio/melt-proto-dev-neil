@@ -11,3 +11,9 @@ export interface Task {
 export interface FormData extends Omit<Task, 'dueDate' | 'id'> {
     dueDate: Date | undefined;
 }
+
+export interface TaskFilters {
+    search?: string
+    status?: Status | undefined
+    date?: Date
+}

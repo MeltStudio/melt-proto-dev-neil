@@ -3,7 +3,7 @@ import React from 'react';
 import { IconWithBackground, Button } from '../ui';
 import Link from 'next/link';
 
-export default function EmptyState() {
+export function EmptyState() {
     return (
         <div className="flex w-full flex-col items-center gap-4 px-6 py-6">
             <div className="flex flex-col items-center gap-4">

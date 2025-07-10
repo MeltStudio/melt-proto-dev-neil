@@ -1,15 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/ui/components/Button";
 import { FeatherPlus } from "@subframe/core";
-import { TextField } from "@/ui/components/TextField";
-import { FeatherSearch } from "@subframe/core";
-import { Select } from "@/ui/components/Select";
-import { FeatherCheckCircle } from "@subframe/core";
-import { Calendar } from "@/ui/components/Calendar";
 import * as SubframeCore from "@subframe/core";
-import { FeatherCalendar } from "@subframe/core";
 import { Table } from "@/ui/components/Table";
 import { FeatherArrowUp } from "@subframe/core";
 import { Badge } from "@/ui/components/Badge";
@@ -29,14 +23,31 @@ import Skeleton from "../components/skeleton";
 import { useTaskContext } from "../providers/fake-api-provider";
 import { useQuery } from "@tanstack/react-query";
 import { Task } from "../components/task";
-import EmptyState from "../components/empty-state";
+import { EmptyState } from "../components/empty-state";
+import { Filters } from "../components/filters";
+import { TaskFilters } from "../utils/types";
+
+const default_values = {
+    search: '',
+    status: undefined,
+    date: undefined
+};
 
 function Home() {
-  const { getTasks } = useTaskContext();
+  const { getTasks, filterTasks } = useTaskContext();
   const { isPending, data, refetch } = useQuery({
     queryKey: ['tasks'],
     queryFn: getTasks,
   });
+  const [filters, setFilters] = useState<TaskFilters>(default_values);
+  const hasFilters = Object.values(filters).some(v => v);
+
+  const parsedData = filterTasks(filters)
+
+
+  const resetFilters = () => {
+    setFilters(default_values);
+  };
 
   return (
     <>
@@ -53,59 +64,9 @@ function Home() {
             </Button>
           </Link>
         </div>
-        <div className="flex w-full items-center gap-4">
-          <span className="text-body-bold font-body-bold text-default-font">
-            Filter by
-          </span>
-          <div className="flex grow shrink-0 basis-0 items-center gap-2">
-            <TextField label="" helpText="" icon={<FeatherSearch />}>
-              <TextField.Input
-                placeholder="Search tasks"
-                value=""
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => { }}
-              />
-            </TextField>
-            <Select
-              label=""
-              placeholder="Status"
-              helpText=""
-              icon={<FeatherCheckCircle />}
-              value={undefined}
-              onValueChange={(value: string) => { }}
-            >
-              <Select.Item value="Ready to start">Ready to start</Select.Item>
-              <Select.Item value="In Progress">In Progress</Select.Item>
-              <Select.Item value="Completed">Completed</Select.Item>
-            </Select>
-            <SubframeCore.Popover.Root>
-              <SubframeCore.Popover.Trigger asChild={true}>
-                <Button
-                  variant="brand-secondary"
-                  icon={<FeatherCalendar />}
-                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => { }}
-                >
-                  July 7, 2024
-                </Button>
-              </SubframeCore.Popover.Trigger>
-              <SubframeCore.Popover.Portal>
-                <SubframeCore.Popover.Content
-                  side="bottom"
-                  align="start"
-                  sideOffset={4}
-                  asChild={true}
-                >
-                  <div className="flex flex-col items-start gap-1 rounded-md border border-solid border-neutral-border bg-default-background px-3 py-3 shadow-lg">
-                    <Calendar
-                      mode={"single"}
-                      selected={new Date()}
-                      onSelect={(date: Date | undefined) => { }}
-                    />
-                  </div>
-                </SubframeCore.Popover.Content>
-              </SubframeCore.Popover.Portal>
-            </SubframeCore.Popover.Root>
-          </div>
-        </div>
+
+        <Filters filters={filters} changeFilters={setFilters} hasFilters={hasFilters} resetFilters={resetFilters}  />
+
         <SubframeCore.ContextMenu.Root>
           <SubframeCore.ContextMenu.Trigger asChild={true}>
             <>
@@ -129,7 +90,7 @@ function Home() {
               >
                 {isPending ? (
                   <Skeleton />
-                ) : data?.map((task) =>
+                ) : parsedData?.map((task) =>
                   <Task key={task.id} task={task} refetch={refetch} />
                 )}
               </Table>

@@ -1,24 +1,25 @@
 'use client';
 
 import { createContext, PropsWithChildren, useCallback, useContext, useMemo, useState } from 'react';
-import { FormData, Task } from '../utils/types';
+import { FormData, Task, TaskFilters } from '../utils/types';
 
 type TasksContext = {
-    getTasks: () => Promise<Array<Task> | null>,
-    getTask: (taskId: string) => Promise<Task | undefined>,
+    getTasks: () => Promise<Array<Task> | null | undefined>;
+    getTask: (taskId: string) => Promise<Task | undefined>;
     createTask: (formData: FormData) => Promise<void>;
     editTask: (formData: FormData) => Promise<void>;
     deleteTask: (taskId: string) => Promise<void>;
+    filterTasks: (filters: TaskFilters) => Array<Task> | null | undefined;
 } | null;
 
 const tasksContext = createContext<TasksContext>(null);
 
 export function TasksProvider({ children }: PropsWithChildren) {
-    const [tasks, setTasks] = useState<Array<Task> | null>(null);
+    const [tasks, setTasks] = useState<Array<Task> | null | undefined>(null);
 
     const getTasks = useCallback(async () => tasks, [tasks]);
 
-    const getTask = useCallback(async (taskId: string) => tasks?.find(({id}) => id === taskId), [tasks]);
+    const getTask = useCallback(async (taskId: string) => tasks?.find(({ id }) => id === taskId), [tasks]);
 
     const createTask = useCallback(async (formData: FormData) => {
         const newTask = { ...formData, id: Date.now().toString() } as Task;
@@ -31,21 +32,40 @@ export function TasksProvider({ children }: PropsWithChildren) {
     }, []);
 
     const editTask = useCallback(async (formData: FormData) => {
-        const taskToUpdate = formData as Task
-        setTasks(prev => prev?.map(task => task.id === taskToUpdate.id ? taskToUpdate : task) || null);
+        const taskToUpdate = formData as Task;
+        setTasks(prev => prev?.map(task => task.id === taskToUpdate.id ? taskToUpdate : task));
     }, []);
 
     const deleteTask = useCallback(async (taskId: string) => {
-        setTasks(prev => prev?.filter(task => task.id !== taskId) || null);
+        setTasks(prev => prev?.filter(task => task.id !== taskId));
     }, []);
+
+    const filterTasks = useCallback((filters: TaskFilters) => {
+        return tasks?.filter(task => {
+            const matchesSearch = filters.search
+                ? task.title.toLowerCase().includes(filters.search.toLowerCase()) || task.description.toLowerCase().includes(filters.search.toLowerCase())
+                : true;
+
+            const matchesStatus = filters.status
+                ? task.status === filters.status
+                : true;
+
+            const matchesDate = filters.date
+                ? task.dueDate.toDateString() === filters.date.toDateString()
+                : true;
+
+            return matchesSearch && matchesStatus && matchesDate;
+        })
+    }, [tasks]);
 
     const value = useMemo(() => ({
         getTasks,
         getTask,
         createTask,
         editTask,
-        deleteTask
-    }), [createTask, deleteTask, editTask, getTask, getTasks]);
+        deleteTask,
+        filterTasks
+    }), [createTask, deleteTask, editTask, filterTasks, getTask, getTasks]);
 
     return (
         <tasksContext.Provider value={value}>
