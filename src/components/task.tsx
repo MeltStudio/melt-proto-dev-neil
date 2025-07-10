@@ -6,7 +6,7 @@ import { FeatherEdit2 } from "@subframe/core";
 import { FeatherTrash } from "@subframe/core";
 import { IconButton } from "@/ui/components/IconButton";
 import { FeatherMoreHorizontal } from "@subframe/core";
-import { StatusBadge } from "../components/status";
+import { StatusBadge } from "./status-badge";
 import { Task as TskType } from "../utils/types";
 import { useRouter } from "next/navigation";
 import { useTaskContext } from "../providers/fake-api-provider";

@@ -40,7 +40,7 @@ export function Filters({ filters, changeFilters, hasFilters, resetFilters }: Pr
                     onValueChange={(value) => {
                         changeFilters(prev => ({
                             ...prev,
-                            status: value as any
+                            status: value as TaskFilters['status']
                         }));
                     }}
                 >

@@ -9,7 +9,11 @@ type TasksContext = {
     createTask: (formData: FormData) => Promise<void>;
     editTask: (formData: FormData) => Promise<void>;
     deleteTask: (taskId: string) => Promise<void>;
-    filterTasks: (filters: TaskFilters) => Array<Task> | null | undefined;
+    paginateTasks: (
+		filters: TaskFilters,
+		page: number,
+		pageSize: number
+	) => { data: Task[]; total: number };
 } | null;
 
 const tasksContext = createContext<TasksContext>(null);
@@ -58,14 +62,25 @@ export function TasksProvider({ children }: PropsWithChildren) {
         })
     }, [tasks]);
 
+    const paginateTasks = useCallback(
+	(filters: TaskFilters, page: number, pageSize: number) => {
+		const filtered = filterTasks(filters) ?? [];
+		const total = filtered.length;
+		const start = (page - 1) * pageSize;
+		const end = start + pageSize;
+		const data = filtered.slice(start, end);
+		return { data, total };
+	},
+	[filterTasks])
+
     const value = useMemo(() => ({
         getTasks,
         getTask,
         createTask,
         editTask,
         deleteTask,
-        filterTasks
-    }), [createTask, deleteTask, editTask, filterTasks, getTask, getTasks]);
+        paginateTasks
+    }), [createTask, deleteTask, editTask, getTask, getTasks, paginateTasks]);
 
     return (
         <tasksContext.Provider value={value}>
