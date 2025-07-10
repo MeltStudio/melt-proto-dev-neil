@@ -10,13 +10,8 @@ import { Button } from "@/ui/components/Button";
 import { FeatherCalendar } from "@subframe/core";
 import { useRouter } from "next/navigation";
 import { Status } from "../utils/enums";
-
-interface FormData {
-    title: string;
-    description: string;
-    status: Status,
-    dueDate: Date | undefined;
-}
+import { FormData } from "../utils/types";
+import { useMutation } from "@tanstack/react-query";
 
 interface Props {
     action?: 'create' | 'edit';
@@ -40,30 +35,26 @@ export function Form({
     onSubmit,
     default_values = DEFAULT_VALUES
 }: Props) {
+    const { back, push } = useRouter();
     const [form, setForm] = useState(default_values);
     const [errors, setErrors] = useState<Array<string> | null>(null);
-    const [loading, setLoading] = useState(false);
-    const { back } = useRouter();
+    const mutation = useMutation({
+		mutationFn: onSubmit,
+		onSuccess: () => push('/'),
+	})
 
     const handleSubmit = async () => {
         const errors = validateForm(form);
 
         if (errors) return setErrors(errors);
-        setLoading(true)
 
-        try {
-            await onSubmit?.(form);
-        } catch (error: any) {
-            setErrors([error.message])
-        } finally {
-            setLoading(false)
-        }
+        await mutation.mutateAsync(form);
     };
 
     return (
         <div className="container max-w-none flex h-full w-full flex-col items-center gap-4 bg-default-background py-12">
             <div className="flex w-full max-w-[448px] flex-col items-start gap-8">
-                <div className="flex w-full flex-col items-start gap-6">
+                <div className="flex w-full flex-col items-start">
                     <div className="flex w-full flex-col items-start">
                         <span className="text-heading-1 font-heading-3 text-default-font">
                             {action === 'create' ? (
@@ -77,12 +68,17 @@ export function Form({
                                 Add details for your new task
                             </span>)}
                     </div>
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col">
                         {errors?.map((err) => (
-                            <span key={err} className="text-caption-bold font-caption-bold text-error-500">
+                            <span key={err} className="text-caption-bold font-caption-bold text-error-500 mt-1">
                                 {err}
                             </span>
                         ))}
+                        {mutation.error && 
+                            <span className="text-caption-bold font-caption-bold text-error-500 mt-1">
+                                {mutation.error.message}
+                            </span>
+                        }
                     </div>
                 </div>
                 <div className="flex w-full flex-col items-start gap-6">
@@ -126,6 +122,7 @@ export function Form({
                                 status: value as Status
                             }));
                         }}
+                        className="w-full"
                     >
                         <Select.Item value={Status.READY_TO_START}>Ready to start</Select.Item>
                         <Select.Item value={Status.IN_PRGRESS}>In progress</Select.Item>
@@ -180,7 +177,7 @@ export function Form({
                     <Button
                         className="h-8 grow shrink-0 basis-0 capitalize"
                         onClick={handleSubmit}
-                        loading={loading}
+                        loading={mutation.isPending}
                     >
                         {action} Task
                     </Button>
