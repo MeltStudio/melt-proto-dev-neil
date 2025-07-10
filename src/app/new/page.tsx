@@ -3,13 +3,11 @@
 import React from "react";
 import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import { Form } from "@/src/components/form";
-import { createTask } from "@/src/models/mutations/create-task";
+import { useTaskContext } from "@/src/providers/fake-api-provider";
 function TaskCreationPage() {
-  return (
-    <DefaultPageLayout>
-      <Form onSubmit={createTask} />
-    </DefaultPageLayout>
-  );
+  const { createTask } = useTaskContext()
+
+  return <Form onSubmit={createTask} />
 }
 
 export default TaskCreationPage;

@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { DefaultPageLayout } from "@/ui/layouts/DefaultPageLayout";
 import { Button } from "@/ui/components/Button";
 import { FeatherPlus } from "@subframe/core";
 import { TextField } from "@/ui/components/TextField";
@@ -14,11 +13,8 @@ import { FeatherCalendar } from "@subframe/core";
 import { Table } from "@/ui/components/Table";
 import { FeatherArrowUp } from "@subframe/core";
 import { Badge } from "@/ui/components/Badge";
-import { DropdownMenu } from "@/ui/components/DropdownMenu";
-import { FeatherEdit2 } from "@subframe/core";
 import { FeatherTrash } from "@subframe/core";
 import { IconButton } from "@/ui/components/IconButton";
-import { FeatherMoreHorizontal } from "@subframe/core";
 import { ContextMenu } from "@/ui/components/ContextMenu";
 import { FeatherCheck } from "@subframe/core";
 import { FeatherEyeOff } from "@subframe/core";
@@ -29,15 +25,20 @@ import { FeatherChevronLeft } from "@subframe/core";
 import { FeatherChevronRight } from "@subframe/core";
 import { FeatherChevronLast } from "@subframe/core";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Skeleton from "../components/skeleton";
+import { useTaskContext } from "../providers/fake-api-provider";
+import { useQuery } from "@tanstack/react-query";
+import { Task } from "../components/task";
 
 function Home() {
-  const { push } = useRouter();
-  const isLoading = false;
+  const { getTasks } = useTaskContext();
+  const { isPending, data, refetch } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: getTasks,
+  });
 
   return (
-    <DefaultPageLayout>
+    <>
       <div className="container max-w-none flex h-full w-full flex-col items-end gap-4 bg-default-background py-12">
         <div className="flex w-full items-center justify-between">
           <span className="text-heading-1 font-heading-1 text-default-font">
@@ -126,71 +127,15 @@ function Home() {
               }
             >
 
-              {isLoading ? (
+              {isPending ? (
                 <Skeleton />
-              ) : [1, 2, 3].map(i =>
-                <Table.Row key={i}>
-                  <Table.Cell>
-                    <span className="whitespace-nowrap text-body-bold font-body-bold text-neutral-700">
-                      Susan Best
-                    </span>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <span className="whitespace-nowrap text-body font-body text-neutral-500">
-                      susan.best@example.com
-                    </span>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Badge variant="success">Completed</Badge>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="flex grow shrink-0 basis-0 items-center gap-2 self-stretch">
-                      <span className="text-body font-body text-default-font">
-                        12/12/2025
-                      </span>
-                    </div>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <div className="flex grow shrink-0 basis-0 items-center justify-end">
-                      <SubframeCore.DropdownMenu.Root>
-                        <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                          <IconButton
-                            icon={<FeatherMoreHorizontal />}
-                            onClick={(
-                              event: React.MouseEvent<HTMLButtonElement>
-                            ) => { }}
-                          />
-                        </SubframeCore.DropdownMenu.Trigger>
-                        <SubframeCore.DropdownMenu.Portal>
-                          <SubframeCore.DropdownMenu.Content
-                            side="bottom"
-                            align="end"
-                            sideOffset={8}
-                            asChild={true}
-                          >
-                            <DropdownMenu>
-
-                              <DropdownMenu.DropdownItem onClick={() => push('/edit')} icon={<FeatherEdit2 />}>
-                                Edit
-                              </DropdownMenu.DropdownItem>
-                              <DropdownMenu.DropdownItem icon={<FeatherTrash />}>
-                                Deactivate
-                              </DropdownMenu.DropdownItem>
-                            </DropdownMenu>
-                          </SubframeCore.DropdownMenu.Content>
-                        </SubframeCore.DropdownMenu.Portal>
-                      </SubframeCore.DropdownMenu.Root>
-                    </div>
-                  </Table.Cell>
-                </Table.Row>
+              ) : data?.map((task) =>
+                  <Task key={task.id} task={task} refetch={refetch} />
               )}
             </Table>
           </SubframeCore.ContextMenu.Trigger>
           <SubframeCore.ContextMenu.Portal>
             <SubframeCore.ContextMenu.Content
-              side="bottom"
-              align="start"
-              sideOffset={4}
               asChild={true}
             >
               <ContextMenu>
@@ -298,7 +243,7 @@ function Home() {
           </div>
         </div>
       </div>
-    </DefaultPageLayout>
+    </>
   );
 }
 

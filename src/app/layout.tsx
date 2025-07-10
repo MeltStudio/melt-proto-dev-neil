@@ -1,6 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { ReactQueryProvider } from "../providers/react-query-provider";
+import { TasksProvider } from "../providers/fake-api-provider";
+import { DefaultPageLayout } from "../ui";
 
 export const metadata: Metadata = {
   title: "Subframe Next.js Starter",
@@ -29,9 +31,13 @@ export default function RootLayout({
       </head>
 
       <body>
-        <ReactQueryProvider>
-          {children}
-        </ReactQueryProvider>
+        <DefaultPageLayout>
+          <ReactQueryProvider>
+            <TasksProvider>
+              {children}
+            </TasksProvider>
+          </ReactQueryProvider>
+        </DefaultPageLayout>
       </body>
     </html>
   );

@@ -5,8 +5,9 @@ export interface Task {
     description: string;
     status: Status,
     dueDate: Date;
+    id: string
 }
 
-export interface FormData extends Omit<Task, 'dueDate'> {
+export interface FormData extends Omit<Task, 'dueDate' | 'id'> {
     dueDate: Date | undefined;
 }

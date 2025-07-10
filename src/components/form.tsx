@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField } from "@/ui/components/TextField";
 import { TextArea } from "@/ui/components/TextArea";
 import { Select } from "@/ui/components/Select";
@@ -10,7 +10,7 @@ import { Button } from "@/ui/components/Button";
 import { FeatherCalendar } from "@subframe/core";
 import { useRouter } from "next/navigation";
 import { Status } from "../utils/enums";
-import { FormData } from "../utils/types";
+import { FormData, Task } from "../utils/types";
 import { useMutation } from "@tanstack/react-query";
 
 interface Props {
@@ -43,11 +43,16 @@ export function Form({
 		onSuccess: () => push('/'),
 	})
 
+    useEffect(() => {
+        setForm(default_values)
+    }, [default_values])
+
     const handleSubmit = async () => {
         const errors = validateForm(form);
 
-        if (errors) return setErrors(errors);
+        if (errors?.length) return setErrors(errors);
 
+        setErrors(null)
         await mutation.mutateAsync(form);
     };
 
@@ -74,11 +79,6 @@ export function Form({
                                 {err}
                             </span>
                         ))}
-                        {mutation.error && 
-                            <span className="text-caption-bold font-caption-bold text-error-500 mt-1">
-                                {mutation.error.message}
-                            </span>
-                        }
                     </div>
                 </div>
                 <div className="flex w-full flex-col items-start gap-6">
